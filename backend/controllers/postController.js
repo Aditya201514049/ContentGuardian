@@ -56,6 +56,11 @@ const deletePost = async (req, res) => {
         const post = await Post.findById(id);
         if (!post) return res.status(404).json({ message: 'Post not found' });
 
+        // Allow only the author of the post or an admin to delete
+        if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
         await post.remove();
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
