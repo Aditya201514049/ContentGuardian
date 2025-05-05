@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, loginUser } = require('@controllers/authController');
+const { registerUser, loginUser, updateUserRole } = require('@controllers/authController');
 const verifyToken = require('@middleware/authMiddleware');
 const authorizeRoles = require('@middleware/roleMiddleware');
 
@@ -12,5 +12,8 @@ router.post('/login', loginUser);
 router.get('/admin-only', verifyToken, authorizeRoles('admin'), (req, res) => {
   res.send('Hello Admin');
 });
+
+// Route to update user role (Admin only)
+router.put('/update-role/:id', verifyToken, authorizeRoles('admin'), updateUserRole);
 
 module.exports = router;
