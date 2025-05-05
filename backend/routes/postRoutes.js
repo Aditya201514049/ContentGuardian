@@ -1,5 +1,5 @@
 const express = require('express');
-const { createPost, getPosts, updatePost, deletePost, addComment } = require('@controllers/postController');
+const { createPost, getPosts, updatePost, deletePost, addComment, deleteComment } = require('@controllers/postController');
 const verifyToken = require('@middleware/authMiddleware');
 const authorizeRoles = require('@middleware/roleMiddleware');
 
@@ -13,5 +13,6 @@ router.delete('/:id', verifyToken, authorizeRoles('admin', 'author'), deletePost
 
 // Comment routes
 router.post('/:id/comments', verifyToken, authorizeRoles('admin', 'author', 'reader'), addComment); // All roles can add comments
+router.delete('/:postId/comments/:commentId', verifyToken, authorizeRoles('admin', 'author', 'reader'), deleteComment); // Permission logic handled in controller
 
 module.exports = router;
