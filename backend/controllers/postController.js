@@ -53,19 +53,46 @@ const updatePost = async (req, res) => {
 const deletePost = async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // First find the post to check authorization
         const post = await Post.findById(id);
-        if (!post) return res.status(404).json({ message: 'Post not found' });
-
-        // Allow only the author of the post or an admin to delete
-        if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied: You are not authorized to delete this post' });
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
         }
 
-        await post.remove();
+        // Convert ObjectId to string for comparison
+        const postAuthorId = post.author.toString();
+        const requestUserId = req.user.id.toString();
+        
+        console.log('Post Author ID:', postAuthorId);
+        console.log('Request User ID:', requestUserId);
+        console.log('User Role:', req.user.role);
+
+        // Check if user is author or admin
+        if (postAuthorId !== requestUserId && req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Access denied: You are not authorized to delete this post',
+                postAuthor: postAuthorId,
+                requestUser: requestUserId,
+                userRole: req.user.role
+            });
+        }
+
+        // Use findByIdAndDelete instead of remove()
+        const deletedPost = await Post.findByIdAndDelete(id);
+        
+        if (!deletedPost) {
+            return res.status(404).json({ message: 'Post could not be deleted' });
+        }
+
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
-        console.error('Error deleting post:', error);
-        res.status(500).json({ message: 'An error occurred while deleting the post', error: error.message });
+        console.error('Error in deletePost:', error);
+        res.status(500).json({ 
+            message: 'An error occurred while deleting the post', 
+            error: error.message,
+            stack: error.stack
+        });
     }
 };
 

@@ -6,9 +6,14 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // contains id, role
+    // Ensure the user object has the correct structure
+    req.user = {
+      id: decoded.id,      // Make sure we use the same property name as expected in controllers
+      role: decoded.role
+    };
     next();
-  } catch {
+  } catch (error) {
+    console.error('Token verification error:', error);
     res.status(401).json({ message: 'Invalid token' });
   }
 };
