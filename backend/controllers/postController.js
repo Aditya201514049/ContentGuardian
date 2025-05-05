@@ -58,13 +58,14 @@ const deletePost = async (req, res) => {
 
         // Allow only the author of the post or an admin to delete
         if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied' });
+            return res.status(403).json({ message: 'Access denied: You are not authorized to delete this post' });
         }
 
         await post.remove();
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting post', error });
+        console.error('Error deleting post:', error);
+        res.status(500).json({ message: 'An error occurred while deleting the post', error: error.message });
     }
 };
 
