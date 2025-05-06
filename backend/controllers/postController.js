@@ -117,10 +117,56 @@ const addComment = async (req, res) => {
     }
 };
 
+// Delete a comment from a post
+const deleteComment = async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+
+        // Find the post
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Find the comment
+        const comment = post.comments.id(commentId);
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        // Authorization check:
+        // 1. Admin can delete any comment
+        // 2. Author of the post can delete any comment on their post
+        // 3. Comment owner can delete their own comment
+        const isAdmin = req.user.role === 'admin';
+        const isPostAuthor = post.author.toString() === req.user.id;
+        const isCommentOwner = comment.user.toString() === req.user.id;
+
+        if (!isAdmin && !isPostAuthor && !isCommentOwner) {
+            return res.status(403).json({ 
+                message: 'Access denied: You are not authorized to delete this comment'
+            });
+        }
+
+        // Remove the comment
+        comment.deleteOne();
+        await post.save();
+
+        res.status(200).json({ message: 'Comment deleted successfully' });
+    } catch (error) {
+        console.error('Error in deleteComment:', error);
+        res.status(500).json({ 
+            message: 'An error occurred while deleting the comment', 
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     createPost,
     getPosts,
     updatePost,
     deletePost,
     addComment,
+    deleteComment,
 };
