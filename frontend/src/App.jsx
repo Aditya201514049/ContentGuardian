@@ -1,8 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import { Home, Login, Register } from './pages';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute, PublicRoute, AuthCheck } from './routes';
 import { tokenService } from './services/api';
