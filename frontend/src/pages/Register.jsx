@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -9,9 +9,8 @@ function Register() {
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [passwordError, setPasswordError] = useState('');
+  const { register, loading, error } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -22,31 +21,22 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    setPasswordError('');
 
     // Validate password match
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
+      setPasswordError('Passwords do not match');
       return;
     }
 
-    try {
-      const response = await axios.post('/api/auth/register', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
-      
-      // Optionally log the user in automatically after registration
-      localStorage.setItem('token', response.data.token);
-      navigate('/'); // Redirect to home page after successful registration
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    const userData = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password
+    };
+    
+    await register(userData);
+    // No need to navigate here - the register function in AuthContext handles it
   };
 
   return (
@@ -54,9 +44,9 @@ function Register() {
       <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create an Account</h2>
         
-        {error && (
+        {(error || passwordError) && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-            <span className="block sm:inline">{error}</span>
+            <span className="block sm:inline">{passwordError || error}</span>
           </div>
         )}
         

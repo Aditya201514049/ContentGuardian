@@ -1,24 +1,51 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Layout = ({ children }) => {
+  const { isAuthenticated, currentUser, logout } = useAuth();
+
   return (
     <div className="min-h-screen">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-blue-600">Content Guardian</h1>
+              <Link to="/" className="text-xl font-bold text-blue-600">Content Guardian</Link>
             </div>
             <nav className="hidden md:flex space-x-10">
-              <a href="#" className="text-gray-500 hover:text-gray-900">Home</a>
-              <a href="#" className="text-gray-500 hover:text-gray-900">Features</a>
-              <a href="#" className="text-gray-500 hover:text-gray-900">Pricing</a>
-              <a href="#" className="text-gray-500 hover:text-gray-900">About</a>
+              <Link to="/" className="text-gray-500 hover:text-gray-900">Home</Link>
+              <a href="#features" className="text-gray-500 hover:text-gray-900">Features</a>
+              <a href="#pricing" className="text-gray-500 hover:text-gray-900">Pricing</a>
+              <a href="#about" className="text-gray-500 hover:text-gray-900">About</a>
             </nav>
             <div className="flex items-center space-x-4">
-              <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                Sign In
-              </button>
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-700">Welcome, {currentUser?.name || 'User'}</span>
+                  <button 
+                    onClick={logout}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <Link 
+                    to="/login"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    to="/register"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -40,10 +67,10 @@ const Layout = ({ children }) => {
                 </h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <a href="#" className="text-sm text-gray-300 hover:text-white">Features</a>
+                    <a href="#features" className="text-sm text-gray-300 hover:text-white">Features</a>
                   </li>
                   <li>
-                    <a href="#" className="text-sm text-gray-300 hover:text-white">Pricing</a>
+                    <a href="#pricing" className="text-sm text-gray-300 hover:text-white">Pricing</a>
                   </li>
                 </ul>
               </div>
@@ -53,10 +80,10 @@ const Layout = ({ children }) => {
                 </h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <a href="#" className="text-sm text-gray-300 hover:text-white">About</a>
+                    <a href="#about" className="text-sm text-gray-300 hover:text-white">About</a>
                   </li>
                   <li>
-                    <a href="#" className="text-sm text-gray-300 hover:text-white">Contact</a>
+                    <a href="#contact" className="text-sm text-gray-300 hover:text-white">Contact</a>
                   </li>
                 </ul>
               </div>

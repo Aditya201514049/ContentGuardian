@@ -1,38 +1,37 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
+  const { login, loading, error } = useAuth();
+  const location = useLocation();
+
+  // Check for success message from registration
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await axios.post('/api/auth/login', {
-        email,
-        password
-      });
-      
-      localStorage.setItem('token', response.data.token);
-      navigate('/'); // Redirect to home page after successful login
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    setSuccessMessage(''); // Clear success message on submit
+    await login({ email, password });
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center p-6">
       <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login to Your Account</h2>
+        
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
+            <span className="block sm:inline">{successMessage}</span>
+          </div>
+        )}
         
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
