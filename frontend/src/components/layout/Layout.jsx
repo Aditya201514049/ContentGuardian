@@ -1,9 +1,30 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { tokenService } from '../../services/api';
 
 const Layout = ({ children }) => {
   const { isAuthenticated, currentUser, logout } = useAuth();
+  const hasToken = tokenService.isLoggedIn();
+  const navigate = useNavigate();
+
+  // Effect to redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && !hasToken) {
+      console.log('Layout detected unauthenticated access, redirecting to login');
+      navigate('/login', { replace: true });
+    }
+  }, [isAuthenticated, hasToken, navigate]);
+
+  // Handle logout with confirmation
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to log out?')) {
+      logout();
+    }
+  };
+
+  // Determine if user should be considered authenticated
+  const userIsAuthenticated = isAuthenticated || hasToken;
 
   return (
     <div className="min-h-screen">
@@ -20,11 +41,13 @@ const Layout = ({ children }) => {
               <a href="#about" className="text-gray-500 hover:text-gray-900">About</a>
             </nav>
             <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
+              {userIsAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700">Welcome, {currentUser?.name || 'User'}</span>
+                  <span className="text-sm text-gray-700">
+                    Welcome, {currentUser?.name || 'User'}
+                  </span>
                   <button 
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
                   >
                     Logout

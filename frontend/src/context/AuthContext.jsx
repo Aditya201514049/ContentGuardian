@@ -1,41 +1,65 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { authService, tokenService } from '../services/api';
+import userService from '../services/user';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // Create context
 const AuthContext = createContext(null);
 
+// Auth state keys in sessionStorage
+const AUTH_STATE_KEY = 'auth_state';
+
 // Provider component
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => userService.getUser());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Update user state and persist it
+  const updateCurrentUser = (user) => {
+    setCurrentUser(user);
+    userService.setUser(user);
+    
+    // Also store auth state in sessionStorage to persist across page refreshes
+    sessionStorage.setItem(AUTH_STATE_KEY, !!user ? 'authenticated' : 'unauthenticated');
+  };
 
   // Check if user is logged in on initial load and when token changes
   const verifyAuth = async () => {
     try {
       setLoading(true);
       
-      if (!tokenService.getToken()) {
-        console.log('No token found during verification');
-        setCurrentUser(null);
+      // First, check if we already have the user in session
+      const sessionUser = userService.getUser();
+      if (sessionUser) {
+        console.log('User found in session storage', sessionUser);
+        updateCurrentUser(sessionUser);
         setLoading(false);
         return;
       }
       
-      console.log('Verifying token...');
-      // First try to verify with the backend
+      if (!tokenService.isLoggedIn()) {
+        console.log('No valid token found during verification');
+        updateCurrentUser(null);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Verifying token with backend...');
+      
+      // Try to verify with the backend
       try {
         const { valid, user } = await authService.verifyToken();
         if (valid && user) {
           console.log('Token verified successfully, user:', user);
-          setCurrentUser(user);
+          updateCurrentUser(user);
         } else {
           console.log('Token is not valid');
           tokenService.removeToken();
-          setCurrentUser(null);
+          userService.clearUser();
+          updateCurrentUser(null);
         }
       } catch (err) {
         // Fallback to /me endpoint if verify endpoint doesn't exist
@@ -43,17 +67,19 @@ export const AuthProvider = ({ children }) => {
           console.log('Falling back to /me endpoint');
           const response = await authService.getCurrentUser();
           console.log('User verification successful:', response.data);
-          setCurrentUser(response.data);
+          updateCurrentUser(response.data);
         } catch (err) {
           console.error('Error verifying token with /me:', err);
           tokenService.removeToken();
-          setCurrentUser(null);
+          userService.clearUser();
+          updateCurrentUser(null);
         }
       }
     } catch (err) {
       console.error('Auth verification error:', err);
       tokenService.removeToken();
-      setCurrentUser(null);
+      userService.clearUser();
+      updateCurrentUser(null);
     } finally {
       setLoading(false);
     }
@@ -62,6 +88,17 @@ export const AuthProvider = ({ children }) => {
   // Verify on initial load
   useEffect(() => {
     verifyAuth();
+    
+    // Set up event listener for auth state changes across tabs
+    const handleStorageChange = (e) => {
+      if (e.key === AUTH_STATE_KEY && e.newValue !== e.oldValue) {
+        console.log('Auth state changed in another tab, reloading...');
+        window.location.reload();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Login function
@@ -76,10 +113,15 @@ export const AuthProvider = ({ children }) => {
       
       // Set user data - handle different API response formats
       const userData = response.data.user || response.data;
-      setCurrentUser(userData);
+      updateCurrentUser(userData);
       
-      console.log('Login successful, navigating to home');
-      navigate('/');
+      // Refresh token timestamp to extend session
+      tokenService.refreshToken();
+      
+      // Get the redirect path from location state or default to home
+      const from = location.state?.from || '/';
+      console.log(`Login successful, navigating to ${from}`);
+      navigate(from, { replace: true });
       return true;
     } catch (err) {
       console.error('Login error:', err);
@@ -115,7 +157,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     console.log('Logging out');
     authService.logout();
-    setCurrentUser(null);
+    tokenService.removeToken();
+    userService.clearUser();
+    updateCurrentUser(null);
     navigate('/login');
   };
 
@@ -124,13 +168,17 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, [location.pathname]);
 
-  // Force verification when route changes
+  // Refresh token data periodically to keep session alive
   useEffect(() => {
-    if (tokenService.getToken() && !currentUser) {
-      console.log('Token exists but no user, verifying again on route change');
-      verifyAuth();
+    if (currentUser) {
+      const interval = setInterval(() => {
+        console.log('Refreshing token timestamp');
+        tokenService.refreshToken();
+      }, 15 * 60 * 1000); // every 15 minutes
+      
+      return () => clearInterval(interval);
     }
-  }, [location.pathname]);
+  }, [currentUser]);
 
   // Debug current authentication state
   useEffect(() => {
@@ -138,7 +186,7 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated: !!currentUser, 
       user: currentUser,
       loading,
-      tokenExists: !!tokenService.getToken()
+      tokenExists: tokenService.isLoggedIn()
     });
   }, [currentUser, loading]);
 
@@ -149,7 +197,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!currentUser
+    isAuthenticated: !!currentUser,
+    verifyAuth // Expose verify function to force refresh when needed
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

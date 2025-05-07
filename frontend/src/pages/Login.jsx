@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { tokenService } from '../services/api';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, isAuthenticated } = useAuth();
   const location = useLocation();
+  const from = location.state?.from || '/';
+  const hasToken = tokenService.isLoggedIn();
 
   // Check for success message from registration
   useEffect(() => {
@@ -16,10 +19,20 @@ function Login() {
     }
   }, [location]);
 
+  // If already authenticated, redirect to home or the page they were trying to access
+  if (isAuthenticated || hasToken) {
+    console.log(`User already authenticated, redirecting to ${from}`);
+    return <Navigate to={from} replace />;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage(''); // Clear success message on submit
-    await login({ email, password });
+    
+    const success = await login({ email, password });
+    
+    // The redirect will be handled by the AuthContext
+    console.log('Login result:', success ? 'Success' : 'Failed');
   };
 
   return (

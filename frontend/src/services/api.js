@@ -11,10 +11,62 @@ const api = axios.create({
 
 // Token handling functions
 const tokenService = {
-  getToken: () => localStorage.getItem('token'),
-  setToken: (token) => localStorage.setItem('token', token),
-  removeToken: () => localStorage.removeItem('token'),
-  isLoggedIn: () => !!localStorage.getItem('token')
+  getToken: () => {
+    // Try sessionStorage first, then localStorage as fallback
+    return sessionStorage.getItem('token') || localStorage.getItem('token');
+  },
+  
+  setToken: (token) => {
+    // Store in both for compatibility
+    sessionStorage.setItem('token', token);
+    localStorage.setItem('token', token);
+    
+    // Also store login timestamp for expiry checks
+    const timestamp = new Date().getTime();
+    sessionStorage.setItem('token_timestamp', timestamp);
+    localStorage.setItem('token_timestamp', timestamp);
+    
+    console.log('Token stored in session and local storage');
+  },
+  
+  removeToken: () => {
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token_timestamp');
+    localStorage.removeItem('token_timestamp');
+    console.log('Token removed from all storage');
+  },
+  
+  isLoggedIn: () => {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    
+    if (!token) return false;
+    
+    // Optional: Check token expiry (e.g., 2 hour session)
+    const timestamp = sessionStorage.getItem('token_timestamp') || localStorage.getItem('token_timestamp');
+    if (timestamp) {
+      const now = new Date().getTime();
+      const twoHours = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+      if (now - parseInt(timestamp) > twoHours) {
+        // Token expired
+        tokenService.removeToken();
+        console.log('Token expired, removed from storage');
+        return false;
+      }
+    }
+    
+    return true;
+  },
+  
+  // Refresh token timestamp to extend session
+  refreshToken: () => {
+    const token = tokenService.getToken();
+    if (token) {
+      const timestamp = new Date().getTime();
+      sessionStorage.setItem('token_timestamp', timestamp);
+      localStorage.setItem('token_timestamp', timestamp);
+    }
+  }
 };
 
 // Request interceptor - automatically attach the auth token to requests

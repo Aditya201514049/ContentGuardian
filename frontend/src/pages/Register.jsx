@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { tokenService } from '../services/api';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -10,7 +11,14 @@ function Register() {
     confirmPassword: ''
   });
   const [passwordError, setPasswordError] = useState('');
-  const { register, loading, error } = useAuth();
+  const { register, loading, error, isAuthenticated } = useAuth();
+  const hasToken = tokenService.isLoggedIn();
+
+  // If already authenticated, redirect to home
+  if (isAuthenticated || hasToken) {
+    console.log('User already authenticated, redirecting to home from register page');
+    return <Navigate to="/" replace />;
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -35,8 +43,9 @@ function Register() {
       password: formData.password
     };
     
-    await register(userData);
-    // No need to navigate here - the register function in AuthContext handles it
+    const success = await register(userData);
+    console.log('Registration result:', success ? 'Success' : 'Failed');
+    // Navigation to login page is handled in the AuthContext
   };
 
   return (
