@@ -17,7 +17,7 @@ const Home = () => {
                 The ultimate solution for content moderation and analysis.
               </p>
               <div className="mt-10 flex justify-center">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md transition duration-150 ease-in-out shadow-md">
+                <button className="bg-blue-600 hover:bg-blue-700 text-blue font-bold py-3 px-6 rounded-md transition duration-150 ease-in-out shadow-md">
                   Try For Free
                 </button>
                 <button className="ml-4 text-blue-600 hover:text-blue-800 font-medium py-3 px-6 border border-blue-500 rounded-md transition duration-150 ease-in-out">
