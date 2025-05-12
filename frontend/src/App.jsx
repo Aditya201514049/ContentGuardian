@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Home, Login, Register } from './pages';
+import { Home, Login, Register, AdminDashboard } from './pages';
 import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute, PublicRoute, AuthCheck } from './routes';
+import { ProtectedRoute, PublicRoute, AuthCheck, AdminRoute } from './routes';
 import { tokenService } from './services/api';
 
 function App() {
@@ -17,6 +17,12 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
             {/* Add other protected routes here */}
+          </Route>
+
+          {/* Admin Routes - Require Admin Role */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/*" element={<AdminDashboard />} />
           </Route>
 
           {/* Public Routes - Redirect to Home if Authenticated */}

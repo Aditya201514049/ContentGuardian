@@ -46,9 +46,17 @@ const Layout = ({ children }) => {
                   <span className="text-sm text-gray-700">
                     Welcome, {currentUser?.name || 'User'}
                   </span>
+                  {currentUser?.role === 'admin' && (
+                    <button 
+                      onClick={() => navigate('/admin')}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      Admin Dashboard
+                    </button>
+                  )}
                   <button 
                     onClick={handleLogout}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue bg-red-600 hover:bg-red-700"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
                   >
                     Logout
                   </button>

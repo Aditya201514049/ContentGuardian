@@ -185,10 +185,17 @@ export const AuthProvider = ({ children }) => {
     console.log('Auth state updated:', { 
       isAuthenticated: !!currentUser, 
       user: currentUser,
+      userRole: currentUser?.role,
       loading,
       tokenExists: tokenService.isLoggedIn()
     });
   }, [currentUser, loading]);
+
+  useEffect(() => {
+    if (currentUser && currentUser.role === 'admin' && location.pathname === '/admin/dashboard') {
+      console.log('Admin user navigated to admin dashboard');
+    }
+  }, [currentUser, location.pathname]);
 
   const value = {
     currentUser,

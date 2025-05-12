@@ -1,4 +1,6 @@
-const UserTable = ({ users, onRoleUpdate, onDelete }) => {
+import PropTypes from 'prop-types';
+
+const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -38,10 +40,16 @@ const UserTable = ({ users, onRoleUpdate, onDelete }) => {
                   <option value="admin">Admin</option>
                 </select>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-4">
+                <button
+                  onClick={() => onView(user._id)}
+                  className="text-blue-600 hover:text-blue-900"
+                >
+                  View
+                </button>
                 <button
                   onClick={() => onDelete(user._id)}
-                  className="text-red-600 hover:text-red-900 ml-4"
+                  className="text-red-600 hover:text-red-900"
                 >
                   Delete
                 </button>
@@ -52,6 +60,20 @@ const UserTable = ({ users, onRoleUpdate, onDelete }) => {
       </table>
     </div>
   );
+};
+
+UserTable.propTypes = {
+  users: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
+      role: PropTypes.string.isRequired
+    })
+  ).isRequired,
+  onRoleUpdate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onView: PropTypes.func
 };
 
 export default UserTable;
