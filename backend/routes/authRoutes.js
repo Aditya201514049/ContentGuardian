@@ -9,6 +9,12 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/profile', verifyToken, getUserProfile);
 
+//Admin specific actions
+router.get('/users', verifyToken, authorizeRoles('admin'), getAllUsers);
+router.get('/users/:id', verifyToken, authorizeRoles('admin'), getUserById);
+router.delete('/users/:id', verifyToken, authorizeRoles('admin'), deleteUser);
+router.get('/stats', verifyToken, authorizeRoles('admin'), getUserStats);
+
 // Test protected route
 router.get('/admin-only', verifyToken, authorizeRoles('admin'), (req, res) => {
   res.send('Hello Admin');
