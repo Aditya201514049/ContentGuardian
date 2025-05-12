@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, loginUser, updateUserRole, getUserProfile } = require('@controllers/authController');
+const { registerUser, loginUser, updateUserRole, getUserProfile, getAllUsers, getUserById, deleteUser, getUserStats } = require('@controllers/authController');
 const verifyToken = require('@middleware/authMiddleware');
 const authorizeRoles = require('@middleware/roleMiddleware');
 
