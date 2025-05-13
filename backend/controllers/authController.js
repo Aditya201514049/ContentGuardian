@@ -107,22 +107,48 @@ const updateUserRole = async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    // Validate role
+    // 1. Find user being updated first
+    const userToUpdate = await User.findById(id);
+    if (!userToUpdate) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // 2. Double-check current user is still admin
+    const currentUser = await User.findById(req.user.id);
+    if (!currentUser || currentUser.role !== 'admin') {
+      return res.status(403).json({ 
+        message: 'You no longer have admin privileges' 
+      });
+    }
+
+    // 3. Prevent admin from changing their own role (strict check)
+    if (id === req.user.id || userToUpdate._id.toString() === req.user.id) {
+      return res.status(403).json({ 
+        message: 'Cannot modify your own role for security reasons' 
+      });
+    }
+
+    // 4. Validate role
     const validRoles = ['admin', 'author', 'reader'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
-    // Find user by ID and update role
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // 4. If changing an admin to non-admin, check if they're the last admin
+    if (userToUpdate.role === 'admin' && role !== 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return res.status(403).json({ 
+          message: 'Cannot change role: System requires at least one admin' 
+        });
+      }
     }
 
-    user.role = role;
-    await user.save();
+    // 5. Update role if all checks pass
+    userToUpdate.role = role;
+    await userToUpdate.save();
 
-    res.status(200).json({ message: 'User role updated successfully', user });
+    res.status(200).json({ message: 'User role updated successfully', user: userToUpdate });
   } catch (error) {
     res.status(500).json({ message: 'Error updating user role', error });
   }
@@ -182,6 +208,21 @@ const getUserStats = async (req, res) => {
   }
 };
 
+// Function to handle role update
+const handleRoleUpdate = async (userId, newRole) => {
+  try {
+    await api.put(`/auth/update-role/${userId}`, { role: newRole });
+    // Refresh the users list
+    const response = await api.get('/auth/users');
+    setUsers(response.data);
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Failed to update user role';
+    setError(errorMessage);
+    // Refresh the users list to reset any UI changes
+    const response = await api.get('/auth/users');
+    setUsers(response.data);
+  }
+};
 
 module.exports = {
   registerUser,
@@ -191,5 +232,6 @@ module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
-  getUserStats
+  getUserStats,
+  handleRoleUpdate
 };

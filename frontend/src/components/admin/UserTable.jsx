@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types';
+import { useAuth } from '../../context/AuthContext';
 
 const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
+  const { currentUser } = useAuth();
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -30,15 +33,22 @@ const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
                 <div className="text-sm text-gray-500">{user.email}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <select
-                  value={user.role}
-                  onChange={(e) => onRoleUpdate(user._id, e.target.value)}
-                  className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="reader">Reader</option>
-                  <option value="author">Author</option>
-                  <option value="admin">Admin</option>
-                </select>
+                {user._id === currentUser?.id ? (
+                  <div className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-md">
+                    {user.role}
+                    <p className="text-xs text-gray-500 mt-1">Cannot modify own role</p>
+                  </div>
+                ) : (
+                  <select
+                    value={user.role}
+                    onChange={(e) => onRoleUpdate(user._id, e.target.value)}
+                    className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="reader">Reader</option>
+                    <option value="author">Author</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-4">
                 <button
@@ -47,12 +57,14 @@ const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
                 >
                   View
                 </button>
-                <button
-                  onClick={() => onDelete(user._id)}
-                  className="text-red-600 hover:text-red-900"
-                >
-                  Delete
-                </button>
+                {user._id !== currentUser?.id && (
+                  <button
+                    onClick={() => onDelete(user._id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}
