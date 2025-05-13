@@ -43,9 +43,12 @@ const Layout = ({ children }) => {
             <div className="flex items-center space-x-4">
               {userIsAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700">
-                    Welcome, {currentUser?.name || 'User'}
-                  </span>
+                  <Link 
+                    to="/profile"
+                    className="text-sm text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                  >
+                    {currentUser?.name || 'User'}
+                  </Link>
                   {currentUser?.role === 'admin' && (
                     <button 
                       onClick={() => navigate('/admin')}
@@ -131,4 +134,4 @@ const Layout = ({ children }) => {
   );
 };
 
-export default Layout; 
+export default Layout;

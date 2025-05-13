@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Home, Login, Register, AdminDashboard } from './pages';
+import { Home, Login, Register, AdminDashboard, Profile } from './pages';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute, PublicRoute, AuthCheck, AdminRoute } from './routes';
 import { tokenService } from './services/api';
@@ -16,6 +16,7 @@ function App() {
           {/* Protected Routes - Require Authentication */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
             {/* Add other protected routes here */}
           </Route>
 
