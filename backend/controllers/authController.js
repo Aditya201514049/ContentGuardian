@@ -70,19 +70,25 @@ const loginUser = async (req, res) => {
 // @desc    Get logged-in user's profile
 // @route   GET /api/users/profile
 // @access  Private (requires authentication)
-const getUserProfile = async (req, res) => {
-  // req.user is assumed to be set by auth middleware after verifying the token
-  const user = await User.findById(req.user._id);
 
-  if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,       // include role in the profile response
-    });
-  } else {
-    res.status(404).json({ message: 'User not found' });
+const getUserProfile = async (req, res) => {
+  try {
+    // Changed from req.user._id to req.user.id to match middleware
+    const user = await User.findById(req.user.id);
+
+    if (user) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
