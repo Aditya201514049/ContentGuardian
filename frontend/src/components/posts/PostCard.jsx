@@ -1,0 +1,72 @@
+// src/components/posts/PostCard.jsx
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { useAuth } from '../../context/AuthContext';
+
+const PostCard = ({ post }) => {
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'admin';
+  const isAuthor = currentUser?._id === post.author._id;
+  const canEdit = isAdmin || isAuthor;
+  
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-bold mb-2">
+        <Link to={`/posts/${post._id}`} className="text-blue-600 hover:text-blue-800">
+          {post.title}
+        </Link>
+      </h2>
+      
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm text-gray-500">
+          By {post.author?.name || 'Unknown'} • {new Date(post.createdAt).toLocaleDateString()}
+        </div>
+        
+        {canEdit && (
+          <div className="space-x-2">
+            <Link 
+              to={`/edit-post/${post._id}`}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              Edit
+            </Link>
+          </div>
+        )}
+      </div>
+      
+      <p className="text-gray-700 mb-4">
+        {post.content.length > 200 
+          ? `${post.content.substring(0, 200)}...` 
+          : post.content}
+      </p>
+      
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-gray-500">
+          {post.comments?.length || 0} comments
+        </div>
+        <Link 
+          to={`/posts/${post._id}`}
+          className="text-blue-600 hover:text-blue-800"
+        >
+          Read more
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+PostCard.propTypes = {
+  post: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
+    author: PropTypes.shape({
+      _id: PropTypes.string,
+      name: PropTypes.string
+    }),
+    createdAt: PropTypes.string.isRequired,
+    comments: PropTypes.array
+  }).isRequired
+};
+
+export default PostCard;
