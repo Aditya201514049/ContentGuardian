@@ -3,6 +3,12 @@ import { useAuth } from '../../context/AuthContext';
 
 const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
   const { currentUser } = useAuth();
+  
+  // Filter out the current user from the displayed list
+  const filteredUsers = users.filter(user => user._id !== currentUser?._id && user._id !== currentUser?.id);
+  
+  // Debug current user object to ensure we're using the right property
+  console.log('Current user in UserTable:', currentUser);
 
   return (
     <div className="overflow-x-auto">
@@ -24,7 +30,7 @@ const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <tr key={user._id}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">{user.name}</div>
@@ -33,7 +39,7 @@ const UserTable = ({ users, onRoleUpdate, onDelete, onView }) => {
                 <div className="text-sm text-gray-500">{user.email}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {user._id === currentUser?.id ? (
+                {user._id === currentUser?._id || user._id === currentUser?.id ? (
                   <div className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-md">
                     {user.role}
                     <p className="text-xs text-gray-500 mt-1">Cannot modify own role</p>
