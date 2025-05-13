@@ -5,6 +5,12 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute, PublicRoute, AuthCheck, AdminRoute } from './routes';
 import { tokenService } from './services/api';
 
+// Import Post Components
+import PostsList from './components/posts/PostsList';
+import PostDetail from './components/posts/PostDetail';
+import CreatePostForm from './components/posts/CreatePostForm';
+import RoleRoute from './components/auth/RoleRoute';
+
 function App() {
   return (
     <Router>
@@ -17,7 +23,14 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
-            {/* Add other protected routes here */}
+            <Route path="/posts" element={<PostsList />} />
+            <Route path="/posts/:id" element={<PostDetail />} />
+          </Route>
+          
+          {/* Role-based Routes - Require Admin or Author Role */}
+          <Route element={<RoleRoute allowedRoles={['admin', 'author']} />}>
+            <Route path="/create-post" element={<CreatePostForm />} />
+            <Route path="/edit-post/:id" element={<CreatePostForm />} />
           </Route>
 
           {/* Admin Routes - Require Admin Role */}

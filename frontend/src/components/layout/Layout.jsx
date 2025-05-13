@@ -34,8 +34,12 @@ const Layout = ({ children }) => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="text-xl font-bold text-blue-600">Content Guardian</Link>
             </div>
-            <nav className="hidden md:flex space-x-10">
+            <nav className="hidden md:flex space-x-6">
               <Link to="/" className="text-gray-500 hover:text-gray-900">Home</Link>
+              <Link to="/posts" className="text-gray-500 hover:text-gray-900">Posts</Link>
+              {currentUser && (currentUser.role === 'admin' || currentUser.role === 'author') && (
+                <Link to="/create-post" className="text-gray-500 hover:text-gray-900">Create Post</Link>
+              )}
               <a href="#features" className="text-gray-500 hover:text-gray-900">Features</a>
               <a href="#pricing" className="text-gray-500 hover:text-gray-900">Pricing</a>
               <a href="#about" className="text-gray-500 hover:text-gray-900">About</a>
