@@ -121,8 +121,11 @@ const updateUserRole = async (req, res) => {
       });
     }
 
-    // 3. Prevent admin from changing their own role (strict check)
-    if (id === req.user.id || userToUpdate._id.toString() === req.user.id) {
+    // 3. Prevent admin from changing their own role (strict check with multiple comparisons)
+    const currentUserId = req.user.id;
+    const targetUserId = userToUpdate._id.toString();
+    
+    if (currentUserId === targetUserId) {
       return res.status(403).json({ 
         message: 'Cannot modify your own role for security reasons' 
       });
@@ -134,7 +137,7 @@ const updateUserRole = async (req, res) => {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
-    // 4. If changing an admin to non-admin, check if they're the last admin
+    // 5. If changing an admin to non-admin, check if they're the last admin
     if (userToUpdate.role === 'admin' && role !== 'admin') {
       const adminCount = await User.countDocuments({ role: 'admin' });
       if (adminCount <= 1) {
@@ -143,14 +146,37 @@ const updateUserRole = async (req, res) => {
         });
       }
     }
+    
+    // 6. If setting a user to admin, check the total number of admins 
+    // (optional: you might want to limit the number of admins)
+    if (role === 'admin' && userToUpdate.role !== 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount >= 5) { // Optional: limit to 5 admins max
+        return res.status(403).json({
+          message: 'Maximum number of admins (5) already reached'
+        });
+      }
+    }
 
-    // 5. Update role if all checks pass
+    // 7. Update role if all checks pass
     userToUpdate.role = role;
     await userToUpdate.save();
 
-    res.status(200).json({ message: 'User role updated successfully', user: userToUpdate });
+    res.status(200).json({ 
+      message: 'User role updated successfully', 
+      user: {
+        _id: userToUpdate._id,
+        name: userToUpdate.name,
+        email: userToUpdate.email,
+        role: userToUpdate.role
+      }
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating user role', error });
+    console.error('Error in updateUserRole:', error);
+    res.status(500).json({ 
+      message: 'Error updating user role', 
+      error: error.message 
+    });
   }
 };
 

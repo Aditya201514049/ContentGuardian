@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const UserDetail = ({ userId, onClose, onUserUpdated }) => {
+  const { currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,6 +48,12 @@ const UserDetail = ({ userId, onClose, onUserUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Prevent updating own role
+      if (userId === currentUser?._id) {
+        setError('For security reasons, you cannot change your own role.');
+        return;
+      }
+      
       // Update role using the existing endpoint
       await api.put(`/auth/update-role/${userId}`, { role: formData.role });
       
@@ -57,7 +65,7 @@ const UserDetail = ({ userId, onClose, onUserUpdated }) => {
       onClose();
     } catch (err) {
       console.error('Error updating user:', err);
-      setError(err.message || 'Failed to update user');
+      setError(err.response?.data?.message || err.message || 'Failed to update user');
     }
   };
 
@@ -134,11 +142,17 @@ const UserDetail = ({ userId, onClose, onUserUpdated }) => {
               value={formData.role}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              disabled={userId === currentUser?._id}
             >
               <option value="reader">Reader</option>
               <option value="author">Author</option>
               <option value="admin">Admin</option>
             </select>
+            {userId === currentUser?._id && (
+              <p className="text-red-500 text-xs italic mt-1">
+                For security reasons, you cannot change your own role.
+              </p>
+            )}
           </div>
           
           <div className="flex items-center justify-between">
