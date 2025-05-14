@@ -38,7 +38,10 @@ const Layout = ({ children }) => {
               <Link to="/" className="text-gray-500 hover:text-gray-900">Home</Link>
               <Link to="/posts" className="text-gray-500 hover:text-gray-900">Posts</Link>
               {currentUser && (currentUser.role === 'admin' || currentUser.role === 'author') && (
-                <Link to="/create-post" className="text-gray-500 hover:text-gray-900">Create Post</Link>
+                <>
+                  <Link to="/create-post" className="text-gray-500 hover:text-gray-900">Create Post</Link>
+                  <Link to="/my-posts" className="text-gray-500 hover:text-gray-900">My Posts</Link>
+                </>
               )}
             </nav>
             <div className="flex items-center space-x-4">

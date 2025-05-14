@@ -4,6 +4,7 @@ import { Home, Login, Register, AdminDashboard, Profile } from './pages';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute, PublicRoute, AuthCheck, AdminRoute } from './routes';
 import { tokenService } from './services/api';
+import MyPostsPage from './pages/MyPostsPage';
 
 // Import Post Components
 import PostsList from './components/posts/PostsList';
@@ -31,6 +32,7 @@ function App() {
           <Route element={<RoleRoute allowedRoles={['admin', 'author']} />}>
             <Route path="/create-post" element={<CreatePostForm />} />
             <Route path="/edit-post/:id" element={<CreatePostForm />} />
+            <Route path="/my-posts" element={<MyPostsPage />} />
           </Route>
 
           {/* Admin Routes - Require Admin Role */}
