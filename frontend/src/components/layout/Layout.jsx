@@ -41,7 +41,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm fixed top-0 left-0 right-0 w-full z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 flex items-center">
@@ -212,7 +212,7 @@ const Layout = ({ children }) => {
           </div>
         )}
       </header>
-      <main>{children}</main>
+      <main className="pt-16">{children}</main>
       <footer className="bg-gray-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="md:flex md:justify-between">
