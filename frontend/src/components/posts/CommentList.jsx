@@ -24,8 +24,24 @@ const CommentList = ({ postId, comments, postAuthorId, onCommentDeleted }) => {
     if (!currentUser) return false;
     
     const isAdmin = currentUser.role === 'admin';
-    const isPostAuthor = currentUser._id === postAuthorId;
-    const isCommentAuthor = currentUser._id === comment.user._id;
+    
+    // Convert IDs to strings for reliable comparison
+    const currentUserIdStr = String(currentUser._id);
+    const postAuthorIdStr = postAuthorId ? String(postAuthorId) : '';
+    const commentUserIdStr = comment.user && comment.user._id ? String(comment.user._id) : '';
+    
+    const isPostAuthor = currentUserIdStr === postAuthorIdStr;
+    const isCommentAuthor = currentUserIdStr === commentUserIdStr;
+    
+    // Log the values to help debug
+    console.log('Comment delete permissions:', {
+      currentUserId: currentUserIdStr,
+      postAuthorId: postAuthorIdStr,
+      commentUserId: commentUserIdStr,
+      isAdmin,
+      isPostAuthor,
+      isCommentAuthor
+    });
     
     return isAdmin || isPostAuthor || isCommentAuthor;
   };
