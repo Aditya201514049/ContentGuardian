@@ -5,9 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 
 const PostCard = ({ post }) => {
   const { currentUser } = useAuth();
-  const isAdmin = currentUser?.role === 'admin';
   const isAuthor = currentUser?._id === post.author._id;
-  const canEdit = isAdmin || isAuthor;
+  const canEdit = isAuthor;
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">

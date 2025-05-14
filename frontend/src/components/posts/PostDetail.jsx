@@ -47,7 +47,8 @@ const PostDetail = () => {
 
   const isAdmin = currentUser?.role === 'admin';
   const isAuthor = currentUser?._id === post?.author?._id;
-  const canEdit = isAdmin || isAuthor;
+  const canEdit = isAuthor;
+  const canDelete = isAdmin || isAuthor;
 
   if (loading) return <div className="text-center py-8">Loading post...</div>;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
@@ -59,22 +60,24 @@ const PostDetail = () => {
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-3xl font-bold">{post.title}</h1>
           
-          {canEdit && (
-            <div className="space-x-2">
+          <div className="space-x-2">
+            {canEdit && (
               <Link 
                 to={`/edit-post/${post._id}`}
                 className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-blue-700"
               >
                 Edit
               </Link>
+            )}
+            {canDelete && (
               <button
                 onClick={handleDeletePost}
                 className="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
               >
                 Delete
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
         <div className="text-sm text-gray-500 mb-6">

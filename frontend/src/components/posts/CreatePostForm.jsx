@@ -33,8 +33,9 @@ const CreatePostForm = () => {
           const response = await api.get(`/posts/${id}`);
           const post = response.data;
           
-          // Check if current user is allowed to edit this post
-          if (currentUser.role !== 'admin' && post.author._id !== currentUser._id) {
+          // Only post author can edit their own post
+          if (post.author._id !== currentUser._id) {
+            console.log('User does not have permission to edit this post');
             navigate('/');
             return;
           }
