@@ -37,7 +37,7 @@ const PostDetail = () => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
     
     try {
-      await api.delete(`/api/posts/${id}`);
+      await api.delete(`/posts/${id}`);
       navigate('/');
     } catch (err) {
       setError('Failed to delete post');

@@ -10,7 +10,7 @@ const CommentList = ({ postId, comments, postAuthorId, onCommentDeleted }) => {
     if (!window.confirm('Are you sure you want to delete this comment?')) return;
     
     try {
-      await api.delete(`/api/posts/${postId}/comments/${commentId}`);
+      await api.delete(`/posts/${postId}/comments/${commentId}`);
       if (onCommentDeleted) {
         onCommentDeleted(commentId);
       }
