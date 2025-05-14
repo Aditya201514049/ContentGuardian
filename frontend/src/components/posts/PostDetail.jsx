@@ -19,7 +19,7 @@ const PostDetail = () => {
       try {
         setLoading(true);
         console.log(`Fetching post with ID: ${id}`);
-        const response = await api.get(`/api/posts/${id}`);
+        const response = await api.get(`/posts/${id}`);
         console.log('Post data received:', response.data);
         setPost(response.data);
       } catch (err) {
