@@ -56,7 +56,7 @@ const CommentForm = ({ postId, onCommentAdded }) => {
       <button
         type="submit"
         disabled={loading || !comment.trim()}
-        className={`px-4 py-2 text-white rounded ${
+        className={`px-4 py-2 text-black rounded ${
           loading || !comment.trim() 
             ? 'bg-gray-400 cursor-not-allowed' 
             : 'bg-blue-600 hover:bg-blue-700'
