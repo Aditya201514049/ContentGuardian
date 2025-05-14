@@ -18,7 +18,9 @@ const PostDetail = () => {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/posts/${id}`);
+        console.log(`Fetching post with ID: ${id}`);
+        const response = await api.get(`/api/posts/${id}`);
+        console.log('Post data received:', response.data);
         setPost(response.data);
       } catch (err) {
         setError('Failed to load post');
@@ -35,7 +37,7 @@ const PostDetail = () => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
     
     try {
-      await api.delete(`/posts/${id}`);
+      await api.delete(`/api/posts/${id}`);
       navigate('/');
     } catch (err) {
       setError('Failed to delete post');

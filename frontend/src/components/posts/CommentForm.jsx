@@ -15,7 +15,7 @@ const CommentForm = ({ postId, onCommentAdded }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.post(`/posts/${postId}/comments`, { comment });
+      const response = await api.post(`/api/posts/${postId}/comments`, { comment });
       
       // Reset form
       setComment('');

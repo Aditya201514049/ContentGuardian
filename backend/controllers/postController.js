@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Post = require('@models/Post');
 
 // Create a new post
@@ -22,6 +23,39 @@ const getPosts = async (req, res) => {
         res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching posts', error });
+    }
+};
+
+// Get a single post by ID
+const getPostById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`[DEBUG] Attempting to fetch post with ID: ${id}`);
+        
+        // Validate the ID format
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.log(`[ERROR] Invalid post ID format: ${id}`);
+            return res.status(400).json({ message: 'Invalid post ID format' });
+        }
+        
+        const post = await Post.findById(id)
+            .populate('author', 'name role')
+            .populate('comments.user', 'name role');
+            
+        if (!post) {
+            console.log(`[ERROR] Post not found with ID: ${id}`);
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        console.log(`[SUCCESS] Successfully fetched post: ${post.title}`);
+        res.status(200).json(post);
+    } catch (error) {
+        console.error('[ERROR] Error fetching post by ID:', error);
+        res.status(500).json({ 
+            message: 'Error fetching post', 
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
@@ -165,6 +199,7 @@ const deleteComment = async (req, res) => {
 module.exports = {
     createPost,
     getPosts,
+    getPostById,
     updatePost,
     deletePost,
     addComment,
