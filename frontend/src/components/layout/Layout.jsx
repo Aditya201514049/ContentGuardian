@@ -57,7 +57,7 @@ const Layout = ({ children }) => {
                       onClick={() => navigate('/admin')}
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue bg-blue-600 hover:bg-blue-700"
                     >
-                      Admin Dashboard
+                      Dashboard
                     </button>
                   )}
                   <button 
