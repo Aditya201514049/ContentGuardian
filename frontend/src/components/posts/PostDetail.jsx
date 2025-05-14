@@ -5,6 +5,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
+import BackButton from '../common/BackButton';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -56,6 +57,10 @@ const PostDetail = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-4">
+        <BackButton to="/" label="Back to Posts" />
+      </div>
+      
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-3xl font-bold">{post.title}</h1>

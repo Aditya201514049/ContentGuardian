@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import PostCard from './PostCard';
+import BackButton from '../common/BackButton';
 
 const MyPosts = () => {
   const { currentUser } = useAuth();
@@ -46,6 +47,10 @@ const MyPosts = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-4">
+        <BackButton to="/" label="Back to Home" />
+      </div>
+      
       <div className="mb-6">
         <h1 className="text-2xl font-bold">My Posts</h1>
       </div>

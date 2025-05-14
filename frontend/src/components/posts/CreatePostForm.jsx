@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import BackButton from '../common/BackButton';
 
 const CreatePostForm = () => {
   const { id } = useParams(); // Will be undefined for new posts
@@ -96,6 +97,10 @@ const CreatePostForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-4">
+        <BackButton label="Back" />
+      </div>
+      
       <h1 className="text-2xl font-bold mb-6">
         {isEditMode ? 'Edit Post' : 'Create New Post'}
       </h1>
