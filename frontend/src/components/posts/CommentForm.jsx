@@ -24,7 +24,22 @@ const CommentForm = ({ postId, onCommentAdded }) => {
       if (onCommentAdded) {
         // Find the newly added comment in the response
         const newComment = response.data.comments[response.data.comments.length - 1];
-        onCommentAdded(newComment);
+        
+        // Make sure we have the complete comment data with user info
+        if (newComment && !newComment.user?.name) {
+          // If the backend didn't populate user info, fetch the complete post to get updated comments
+          const updatedPostResponse = await api.get(`/posts/${postId}`);
+          const updatedPost = updatedPostResponse.data;
+          const updatedComment = updatedPost.comments.find(c => c._id === newComment._id);
+          
+          if (updatedComment) {
+            onCommentAdded(updatedComment);
+          } else {
+            onCommentAdded(newComment);
+          }
+        } else {
+          onCommentAdded(newComment);
+        }
       }
     } catch (err) {
       setError('Failed to add comment');

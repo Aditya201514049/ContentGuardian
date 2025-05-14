@@ -91,10 +91,31 @@ const PostDetail = () => {
         
         {currentUser ? (
           <CommentForm postId={post._id} onCommentAdded={(newComment) => {
-            setPost({
-              ...post,
-              comments: [...(post.comments || []), newComment]
-            });
+            // If user info is missing, make a fresh API call to get the updated post
+            if (!newComment.user?.name) {
+              // Refresh the entire post data to get updated comments with user info
+              const refreshPostData = async () => {
+                try {
+                  const response = await api.get(`/posts/${post._id}`);
+                  setPost(response.data);
+                } catch (err) {
+                  console.error('Failed to refresh post after comment added', err);
+                  // Fall back to just adding the comment without user info
+                  setPost({
+                    ...post,
+                    comments: [...(post.comments || []), newComment]
+                  });
+                }
+              };
+              
+              refreshPostData();
+            } else {
+              // We have complete user info, just update the post state
+              setPost({
+                ...post,
+                comments: [...(post.comments || []), newComment]
+              });
+            }
           }} />
         ) : (
           <p className="text-gray-500 mb-6">
