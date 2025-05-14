@@ -16,7 +16,11 @@ const PostsList = () => {
       try {
         setLoading(true);
         const response = await api.get('/posts');
-        setPosts(response.data);
+        // Sort posts by createdAt date in descending order (newest first)
+        const sortedPosts = [...response.data].sort((a, b) => 
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setPosts(sortedPosts);
       } catch (err) {
         setError('Failed to load posts');
         console.error(err);
