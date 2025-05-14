@@ -41,7 +41,7 @@ const PostsList = () => {
         {canCreatePost && (
           <Link 
             to="/create-post" 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="inline-flex items-center px-5 py-2.5 text-sm md:text-base font-medium rounded-lg shadow-sm text-white bg-white-600 hover:bg-blue-700 transition duration-150 ease-in-out border border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Create Post
           </Link>
