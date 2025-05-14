@@ -40,9 +40,6 @@ const Layout = ({ children }) => {
               {currentUser && (currentUser.role === 'admin' || currentUser.role === 'author') && (
                 <Link to="/create-post" className="text-gray-500 hover:text-gray-900">Create Post</Link>
               )}
-              <a href="#features" className="text-gray-500 hover:text-gray-900">Features</a>
-              <a href="#pricing" className="text-gray-500 hover:text-gray-900">Pricing</a>
-              <a href="#about" className="text-gray-500 hover:text-gray-900">About</a>
             </nav>
             <div className="flex items-center space-x-4">
               {userIsAuthenticated ? (
