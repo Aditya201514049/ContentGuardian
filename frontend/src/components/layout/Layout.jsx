@@ -107,7 +107,7 @@ const Layout = ({ children }) => {
                       onClick={() => navigate('/admin')}
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
                     >
-                      Admin Dashboard
+                    Dashboard
                     </button>
                   )}
                   <button 
@@ -196,7 +196,7 @@ const Layout = ({ children }) => {
                   
                   {currentUser?.role === 'admin' && (
                     <Link to="/admin" className="text-base font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
-                      Admin Dashboard
+                    Dashboard
                     </Link>
                   )}
                   
