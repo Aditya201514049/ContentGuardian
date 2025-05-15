@@ -151,14 +151,18 @@ const CreatePostForm = () => {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-700"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className={`px-4 py-2 rounded ${
+              loading 
+                ? 'bg-gray-400 dark:bg-gray-500 text-gray-800 dark:text-white cursor-not-allowed' 
+                : 'bg-gray-600 dark:bg-gray-600 text-black dark:text-white hover:bg-gray-700 dark:hover:bg-gray-700'
+            }`}
           >
             {loading ? 'Saving...' : isEditMode ? 'Update Post' : 'Create Post'}
           </button>
