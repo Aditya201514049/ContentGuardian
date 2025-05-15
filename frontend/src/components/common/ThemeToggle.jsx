@@ -21,7 +21,7 @@ const ThemeToggle = () => {
     if (newDarkMode) {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark');
-      document.body.style.backgroundColor = '#111827';
+      document.body.style.backgroundColor = '#1f2937';
       document.body.style.color = '#e5e7eb';
       localStorage.theme = 'dark';
     } else {

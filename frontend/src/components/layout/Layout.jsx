@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
   const userIsAuthenticated = isAuthenticated || hasToken;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white layout-bg-container">
       <header className="bg-white dark:bg-gray-800 shadow-sm fixed top-0 left-0 right-0 w-full z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">

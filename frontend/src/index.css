@@ -16,6 +16,26 @@ body {
   padding: 0;
 }
 
+/* Custom background styling */
+.layout-bg-container {
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
+html.dark .layout-bg-container {
+  background-color: #1f2937;
+}
+
+/* Custom home background styling */
+.home-bg-container {
+  background: linear-gradient(to bottom right, #ebf5ff, #e6f0ff);
+  transition: background-color 0.3s ease;
+}
+
+html.dark .home-bg-container {
+  background: #1f2937;
+}
+
 html, body {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

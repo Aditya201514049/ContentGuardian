@@ -25,7 +25,7 @@ export const ThemeProvider = ({ children }) => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark');
-      document.body.style.backgroundColor = '#111827';
+      document.body.style.backgroundColor = '#1f2937';
       document.body.style.color = '#e5e7eb';
     } else {
       document.documentElement.classList.remove('dark');

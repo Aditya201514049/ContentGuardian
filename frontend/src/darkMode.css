@@ -5,7 +5,7 @@
   color-scheme: dark;
 }
 
-.dark body,
+/* Remove body background to allow component-specific dark mode backgrounds */
 .dark .bg-white {
   background-color: rgb(17 24 39 / var(--tw-bg-opacity)) !important;
   color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
