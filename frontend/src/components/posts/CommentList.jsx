@@ -53,22 +53,22 @@ const CommentList = ({ postId, comments, postAuthorId, onCommentDeleted }) => {
   return (
     <div className="space-y-4">
       {comments.map(comment => (
-        <div key={comment._id} className="bg-gray-50 p-4 rounded-lg">
+        <div key={comment._id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
           <div className="flex justify-between">
-            <div className="font-medium">{comment.user?.name || 'Anonymous'}</div>
+            <div className="font-medium dark:text-white">{comment.user?.name || 'Anonymous'}</div>
             {canDeleteComment(comment) && (
               <button
                 onClick={() => handleDeleteComment(comment._id)}
-                className="text-red-600 hover:text-red-800 text-sm"
+                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
               >
                 Delete
               </button>
             )}
           </div>
-          <div className="text-sm text-gray-500 mb-2">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
             {new Date(comment.createdAt).toLocaleString()}
           </div>
-          <p>{comment.comment}</p>
+          <p className="dark:text-gray-300">{comment.comment}</p>
         </div>
       ))}
     </div>

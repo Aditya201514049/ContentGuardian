@@ -14,7 +14,7 @@ const BackButton = ({ to, label = 'Back' }) => {
   return (
     <button
       onClick={handleClick}
-      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
+      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 

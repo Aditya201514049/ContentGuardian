@@ -30,4 +30,41 @@
 .dark .shadow-md {
   --tw-shadow-color: rgb(0 0 0 / 0.3) !important;
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+}
+
+/* Fix for back button in dark mode */
+.dark button.text-gray-700 {
+  color: rgb(209 213 219 / var(--tw-text-opacity)) !important;
+}
+
+/* Fix for delete button in dark mode */
+.dark button.bg-red-600 {
+  background-color: #dc2626 !important;
+  color: white !important;
+}
+
+.dark button.text-red-600 {
+  color: #ef4444 !important;
+}
+
+/* Fix for Post Comment button in dark mode */
+.dark button[type="submit"] {
+  color: white !important;
+}
+
+.dark button[type="submit"]:disabled {
+  background-color: #6b7280 !important;
+  color: #e5e7eb !important;
+}
+
+/* Fix for comments section in dark mode */
+.dark .bg-gray-50 {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity)) !important;
+  color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
+}
+
+.dark textarea {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity)) !important;
+  color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
+  border-color: rgb(75 85 99 / var(--tw-bg-opacity)) !important;
 } 

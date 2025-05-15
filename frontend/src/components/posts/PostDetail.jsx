@@ -77,7 +77,7 @@ const PostDetail = () => {
             {canDelete && (
               <button
                 onClick={handleDeletePost}
-                className="px-4 py-2 bg-red-600 text-black rounded hover:bg-red-700"
+                className="px-4 py-2 bg-red-600 text-white dark:text-white rounded hover:bg-red-700"
               >
                 Delete
               </button>
