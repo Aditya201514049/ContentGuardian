@@ -49,7 +49,7 @@ const Layout = ({ children }) => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">Content Guardian</Link>
             </div>
-            
+
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-6">
               <Link to="/" className="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Home</Link>
@@ -60,17 +60,17 @@ const Layout = ({ children }) => {
                 </>
               )}
             </nav>
-            
+
             {/* Theme Toggle and Mobile Menu Button */}
             <div className="flex items-center">
               {/* Theme Toggle */}
               <div className="mr-4">
                 <ThemeToggle />
               </div>
-              
+
               {/* Mobile Menu Button */}
               <div className="md:hidden">
-                <button 
+                <button
                   type="button"
                   onClick={toggleMobileMenu}
                   className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
@@ -91,41 +91,42 @@ const Layout = ({ children }) => {
                 </button>
               </div>
             </div>
-            
+
             {/* Desktop user menu */}
             <div className="hidden md:flex items-center space-x-4">
               {userIsAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <Link 
+                  <Link
                     to="/profile"
                     className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                   >
                     {currentUser?.name || 'User'}
                   </Link>
                   {currentUser?.role === 'admin' && (
-                    <button 
-                      onClick={() => navigate('/admin')}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                    <Link
+                      to="/admin"
+                      className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                     >
-                    Dashboard
-                    </button>
+                      Dashboard
+                    </Link>
                   )}
-                  <button 
+                  <Link
+                    to="#"
                     onClick={handleLogout}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+                    className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
                   >
                     Logout
-                  </button>
+                  </Link>
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
-                  <Link 
+                  <Link
                     to="/login"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
                   >
                     Sign In
                   </Link>
-                  <Link 
+                  <Link
                     to="/register"
                     className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
@@ -136,7 +137,7 @@ const Layout = ({ children }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden">
@@ -145,8 +146,8 @@ const Layout = ({ children }) => {
               <div className="p-6 space-y-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-medium text-gray-900 dark:text-white">Menu</h2>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                     onClick={toggleMobileMenu}
                   >
@@ -156,7 +157,7 @@ const Layout = ({ children }) => {
                     </svg>
                   </button>
                 </div>
-                
+
                 <nav className="flex flex-col space-y-4">
                   {userIsAuthenticated && (
                     <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -170,7 +171,7 @@ const Layout = ({ children }) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Theme toggle in mobile menu */}
                       <div className="flex items-center mt-4">
                         <span className="mr-2 text-sm text-gray-500 dark:text-gray-400">Theme:</span>
@@ -178,11 +179,11 @@ const Layout = ({ children }) => {
                       </div>
                     </div>
                   )}
-                  
+
                   <Link to="/" className="text-base font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
                     Home
                   </Link>
-                  
+
                   {currentUser && (currentUser.role === 'admin' || currentUser.role === 'author') && (
                     <>
                       <Link to="/create-post" className="text-base font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
@@ -193,19 +194,19 @@ const Layout = ({ children }) => {
                       </Link>
                     </>
                   )}
-                  
+
                   {currentUser?.role === 'admin' && (
                     <Link to="/admin" className="text-base font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
-                    Dashboard
+                      Dashboard
                     </Link>
                   )}
-                  
+
                   {userIsAuthenticated ? (
                     <>
                       <Link to="/profile" className="text-base font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
                         Profile
                       </Link>
-                      <button 
+                      <button
                         onClick={handleLogout}
                         className="w-full text-left text-base font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                       >
