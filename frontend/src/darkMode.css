@@ -1,0 +1,33 @@
+/* Basic dark mode styles */
+.dark {
+  --tw-bg-opacity: 1;
+  --tw-text-opacity: 1;
+  color-scheme: dark;
+}
+
+.dark body,
+.dark .bg-white {
+  background-color: rgb(17 24 39 / var(--tw-bg-opacity)) !important;
+  color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
+}
+
+.dark .text-gray-700 {
+  color: rgb(209 213 219 / var(--tw-text-opacity)) !important;
+}
+
+.dark .text-gray-900 {
+  color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity)) !important;
+}
+
+.dark .bg-gray-800 {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity)) !important;
+}
+
+.dark .shadow-md {
+  --tw-shadow-color: rgb(0 0 0 / 0.3) !important;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+} 

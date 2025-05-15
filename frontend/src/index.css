@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
-/* Base styles */
+/* Reset base styles for Tailwind */
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
   width: 100%;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -15,19 +16,37 @@ body {
   padding: 0;
 }
 
-:root {
+html, body {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode transitions */
+.dark-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Apply dark mode styles */
+:root {
+  --background-color: #ffffff;
+  --text-color: #213547;
+}
+
+.dark {
+  --background-color: #111827;
+  --text-color: #e5e7eb;
+}
+
+/* Default button styles that don't conflict with Tailwind components */
+button:focus,
+button:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 
 a {
@@ -57,10 +76,6 @@ button {
 }
 button:hover {
   border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {

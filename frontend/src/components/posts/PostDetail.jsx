@@ -61,9 +61,9 @@ const PostDetail = () => {
         <BackButton to="/" label="Back to Posts" />
       </div>
       
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
         <div className="flex justify-between items-start mb-4">
-          <h1 className="text-3xl font-bold">{post.title}</h1>
+          <h1 className="text-3xl font-bold dark:text-white">{post.title}</h1>
           
           <div className="space-x-2">
             {canEdit && (
@@ -85,17 +85,17 @@ const PostDetail = () => {
           </div>
         </div>
         
-        <div className="text-sm text-gray-500 mb-6">
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           By {post.author?.name || 'Unknown'} • {new Date(post.createdAt).toLocaleDateString()}
         </div>
         
-        <div className="prose max-w-none">
+        <div className="prose dark:prose-invert max-w-none">
           {post.content}
         </div>
       </div>
       
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Comments</h2>
+        <h2 className="text-2xl font-bold mb-4 dark:text-white">Comments</h2>
         
         {currentUser ? (
           <CommentForm postId={post._id} onCommentAdded={(newComment) => {
