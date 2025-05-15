@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import BackButton from '../common/BackButton';
+import Layout from '../layout/Layout';
 
 const CreatePostForm = () => {
   const { id } = useParams(); // Will be undefined for new posts
@@ -92,16 +93,20 @@ const CreatePostForm = () => {
   };
 
   if (loadingPost) {
-    return <div className="text-center py-8">Loading post...</div>;
+    return (
+      <Layout>
+        <div className="text-center py-8">Loading post...</div>
+      </Layout>
+    );
   }
 
-  return (
+  const formContent = (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-4">
         <BackButton label="Back" />
       </div>
       
-      <h1 className="text-2xl font-bold mb-6">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
         {isEditMode ? 'Edit Post' : 'Create New Post'}
       </h1>
       
@@ -113,7 +118,7 @@ const CreatePostForm = () => {
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2" htmlFor="title">
+          <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="title">
             Title
           </label>
           <input
@@ -122,13 +127,13 @@ const CreatePostForm = () => {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 text-gray-700 dark:text-gray-300 dark:bg-gray-800 border dark:border-gray-700 rounded-lg focus:outline-none focus:border-blue-500"
             placeholder="Enter post title"
           />
         </div>
         
         <div className="mb-6">
-          <label className="block text-gray-700 font-bold mb-2" htmlFor="content">
+          <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2" htmlFor="content">
             Content
           </label>
           <textarea
@@ -136,7 +141,7 @@ const CreatePostForm = () => {
             name="content"
             value={formData.content}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 text-gray-700 dark:text-gray-300 dark:bg-gray-800 border dark:border-gray-700 rounded-lg focus:outline-none focus:border-blue-500"
             rows="10"
             placeholder="Write your post content here..."
           ></textarea>
@@ -146,16 +151,14 @@ const CreatePostForm = () => {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className={`px-4 py-2 text-black rounded ${
-              loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             {loading ? 'Saving...' : isEditMode ? 'Update Post' : 'Create Post'}
           </button>
@@ -163,6 +166,8 @@ const CreatePostForm = () => {
       </form>
     </div>
   );
+
+  return <Layout>{formContent}</Layout>;
 };
 
 export default CreatePostForm;

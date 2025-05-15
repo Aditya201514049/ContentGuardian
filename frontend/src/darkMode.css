@@ -3,6 +3,12 @@
   --tw-bg-opacity: 1;
   --tw-text-opacity: 1;
   color-scheme: dark;
+  background-color: #1f2937;
+}
+
+/* Apply dark background to body in dark mode */
+.dark body {
+  background-color: #1f2937;
 }
 
 /* Remove body background to allow component-specific dark mode backgrounds */
@@ -49,6 +55,7 @@
 
 /* Fix for Post Comment button in dark mode */
 .dark button[type="submit"] {
+  background-color: #4b5563 !important;
   color: white !important;
 }
 
@@ -64,6 +71,15 @@
 }
 
 .dark textarea {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity)) !important;
+  color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
+  border-color: rgb(75 85 99 / var(--tw-bg-opacity)) !important;
+}
+
+/* Fix for form elements in dark mode */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"] {
   background-color: rgb(31 41 55 / var(--tw-bg-opacity)) !important;
   color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
   border-color: rgb(75 85 99 / var(--tw-bg-opacity)) !important;
