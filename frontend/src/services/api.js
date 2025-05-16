@@ -55,42 +55,42 @@ export const testConnection = async () => {
 // Token handling functions
 const tokenService = {
   getToken: () => {
-    // Try sessionStorage first, then localStorage as fallback
-    return sessionStorage.getItem('token') || localStorage.getItem('token');
+    // Try localStorage first, then sessionStorage as fallback for better persistence
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   },
   
   setToken: (token) => {
     // Store in both for compatibility
-    sessionStorage.setItem('token', token);
     localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
     
     // Also store login timestamp for expiry checks
     const timestamp = new Date().getTime();
-    sessionStorage.setItem('token_timestamp', timestamp);
     localStorage.setItem('token_timestamp', timestamp);
+    sessionStorage.setItem('token_timestamp', timestamp);
     
-    console.log('Token stored in session and local storage');
+    console.log('Token stored in local storage and session storage');
   },
   
   removeToken: () => {
-    sessionStorage.removeItem('token');
     localStorage.removeItem('token');
-    sessionStorage.removeItem('token_timestamp');
+    sessionStorage.removeItem('token');
     localStorage.removeItem('token_timestamp');
+    sessionStorage.removeItem('token_timestamp');
     console.log('Token removed from all storage');
   },
   
   isLoggedIn: () => {
-    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     
     if (!token) return false;
     
-    // Optional: Check token expiry (e.g., 2 hour session)
-    const timestamp = sessionStorage.getItem('token_timestamp') || localStorage.getItem('token_timestamp');
+    // Check token expiry (using a longer expiry time to reduce backend calls)
+    const timestamp = localStorage.getItem('token_timestamp') || sessionStorage.getItem('token_timestamp');
     if (timestamp) {
       const now = new Date().getTime();
-      const twoHours = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
-      if (now - parseInt(timestamp) > twoHours) {
+      const tokenLifetime = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+      if (now - parseInt(timestamp) > tokenLifetime) {
         // Token expired
         tokenService.removeToken();
         console.log('Token expired, removed from storage');
@@ -106,8 +106,8 @@ const tokenService = {
     const token = tokenService.getToken();
     if (token) {
       const timestamp = new Date().getTime();
-      sessionStorage.setItem('token_timestamp', timestamp);
       localStorage.setItem('token_timestamp', timestamp);
+      sessionStorage.setItem('token_timestamp', timestamp);
     }
   }
 };

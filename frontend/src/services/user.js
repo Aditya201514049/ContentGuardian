@@ -3,26 +3,28 @@
 const USER_KEY = 'current_user';
 
 const userService = {
-  // Store user data in session storage
+  // Store user data in localStorage for persistence across tab closures
   setUser: (userData) => {
     if (!userData) {
-      sessionStorage.removeItem(USER_KEY);
+      localStorage.removeItem(USER_KEY);
+      sessionStorage.removeItem(USER_KEY); // Clear from both storages
       return;
     }
     
     try {
       const userStr = JSON.stringify(userData);
-      sessionStorage.setItem(USER_KEY, userStr);
-      console.log('User data stored in session', userData);
+      localStorage.setItem(USER_KEY, userStr);
+      sessionStorage.setItem(USER_KEY, userStr); // Also keep in session for compatibility
+      console.log('User data stored in localStorage', userData);
     } catch (e) {
       console.error('Error storing user data:', e);
     }
   },
   
-  // Get user data from session storage
+  // Get user data from localStorage with sessionStorage fallback
   getUser: () => {
     try {
-      const userStr = sessionStorage.getItem(USER_KEY);
+      const userStr = localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
       if (!userStr) return null;
       
       return JSON.parse(userStr);
@@ -32,15 +34,16 @@ const userService = {
     }
   },
   
-  // Remove user data from session storage
+  // Remove user data from both storages
   clearUser: () => {
+    localStorage.removeItem(USER_KEY);
     sessionStorage.removeItem(USER_KEY);
-    console.log('User data removed from session');
+    console.log('User data removed from all storages');
   },
   
-  // Check if user is stored in session
+  // Check if user is stored in localStorage or sessionStorage
   hasUser: () => {
-    return !!sessionStorage.getItem(USER_KEY);
+    return !!(localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY));
   },
   
   // Update specific user properties
@@ -59,4 +62,4 @@ const userService = {
   }
 };
 
-export default userService; 
+export default userService;
