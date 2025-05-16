@@ -17,7 +17,7 @@ const allowedOrigins = [
   'http://localhost:5176',
   'http://localhost:5177',
   'http://localhost:3000',
-  'https://your-frontend-render-url.onrender.com' // Add your frontend Render URL here
+  'https://contentguardian-1.onrender.com' // Add your frontend Render URL here
 ];
 
 app.use(cors({
