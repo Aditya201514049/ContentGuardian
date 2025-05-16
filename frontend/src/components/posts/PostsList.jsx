@@ -6,12 +6,22 @@ import { useAuth } from '../../context/AuthContext';
 import PostCard from './PostCard';
 
 const PostsList = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, initialCheckDone } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    // Wait for authentication to be fully initialized before fetching posts
+    if (!initialCheckDone && retryCount < 3) {
+      // If auth check isn't done yet, set a small delay and try again
+      const timer = setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+    
     const fetchPosts = async () => {
       try {
         setLoading(true);
@@ -21,16 +31,25 @@ const PostsList = () => {
           new Date(b.createdAt) - new Date(a.createdAt)
         );
         setPosts(sortedPosts);
+        setError(null); // Clear any previous errors
       } catch (err) {
+        console.error('Error fetching posts:', err);
         setError('Failed to load posts');
-        console.error(err);
+        
+        // Add retry logic for network errors
+        if (retryCount < 3) {
+          const timer = setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+          }, 1200); // Increasing backoff time
+          return () => clearTimeout(timer);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchPosts();
-  }, []);
+  }, [initialCheckDone, retryCount]);
 
   const canCreatePost = currentUser && 
     (currentUser.role === 'admin' || currentUser.role === 'author');
