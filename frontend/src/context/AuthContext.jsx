@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { authService, tokenService } from '../services/api';
 import userService from '../services/user';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -6,206 +6,184 @@ import { useNavigate, useLocation } from 'react-router-dom';
 // Create context
 const AuthContext = createContext(null);
 
-// Auth state keys in localStorage and sessionStorage
+// Auth state keys in localStorage
 const AUTH_STATE_KEY = 'auth_state';
 
 // Provider component
 export const AuthProvider = ({ children }) => {
+  // Initialize user state from localStorage immediately to prevent flicker
   const [currentUser, setCurrentUser] = useState(() => userService.getUser());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with loading false to avoid initial flicker
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const verifyingRef = useRef(false); // Track if verification is already in progress
 
   // Update user state and persist it
   const updateCurrentUser = (user) => {
     setCurrentUser(user);
     userService.setUser(user);
     
-    // Store auth state in both localStorage and sessionStorage
-    // Using localStorage ensures persistence when closing the tab
+    // Store auth state in localStorage to persist across tab closures
     localStorage.setItem(AUTH_STATE_KEY, !!user ? 'authenticated' : 'unauthenticated');
-    sessionStorage.setItem(AUTH_STATE_KEY, !!user ? 'authenticated' : 'unauthenticated');
   };
 
   // Check if user is logged in on initial load and when token changes
-  const verifyAuth = async () => {
-    try {
-      setLoading(true);
-      const authState = localStorage.getItem(AUTH_STATE_KEY) || sessionStorage.getItem(AUTH_STATE_KEY);
-      
-      // First, check if we already have the user in local/session storage
-      const storedUser = userService.getUser();
-      if (storedUser) {
-        console.log('User found in storage', storedUser);
-        updateCurrentUser(storedUser);
-        
-        // Even if we have a user, verify with backend in the background
-        // but don't block the UI with loading state
-        setLoading(false);
-        
-        // Background verification
-        setTimeout(() => {
-          verifyTokenWithBackend(storedUser);
-        }, 500); // Small delay to prioritize UI rendering
-        
-        return;
-      }
-      
-      if (!tokenService.isLoggedIn()) {
-        console.log('No valid token found during verification');
-        updateCurrentUser(null);
-        setLoading(false);
-        return;
-      }
-      
-      // If we have a token but no user data, try to get user data from backend
-      console.log('Token found but no user data, verifying with backend...');
-      verifyTokenWithBackend();
-    } catch (err) {
-      console.error('Auth verification error:', err);
-      tokenService.removeToken();
-      userService.clearUser();
-      updateCurrentUser(null);
-      setLoading(false);
-    }
-  };
-  
-  // Backend verification with better handling of backend wake-up delay
-  // and more resilient to network failures when offline
-  const verifyTokenWithBackend = async (fallbackUser = null) => {
-    let backendVerified = false;
-    const verifyStartTime = Date.now();
-    
-    // If we have fallback user data and a token, consider authenticated by default
-    // This ensures we don't lose auth state when backend is unavailable
-    if (fallbackUser && tokenService.isLoggedIn()) {
-      console.log('Using stored user data as primary auth source');
-      setLoading(false);
-      
-      // Still try backend verification in the background without affecting UI
-      setTimeout(() => {
-        performBackgroundVerification(fallbackUser);
-      }, 500);
-      
+  const verifyAuth = async (forceCheck = false) => {
+    // Prevent concurrent verifications to avoid race conditions
+    if (verifyingRef.current) {
+      console.log('Auth verification already in progress, skipping');
       return;
     }
     
+    // Set verification in progress
+    verifyingRef.current = true;
+    
+    // Don't set loading true during initial page load to prevent flicker
+    // Only set loading if this is a manual verification
+    if (forceCheck) {
+      setLoading(true);
+    }
+    
     try {
-      console.log('Verifying token with backend...');
+      // First, check if we already have the user in localStorage
+      const storedUser = userService.getUser();
+      const hasToken = tokenService.isLoggedIn();
       
-      // Try to verify with the backend with timeout handling
-      const verifyPromise = authService.verifyToken();
-      
-      // Set a timeout to handle the case where backend is waking up (for free tier)
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          if (fallbackUser && !backendVerified) {
-            // If we have a fallback user and backend is taking too long
-            console.log('Backend verification taking too long, keeping stored user data');
-            // IMPORTANT: We don't reject here, just return, allowing the stored data to be used
-            return;
-          }
-          reject(new Error('Backend verification timeout after 5 seconds'));
-        }, 5000); // 5 seconds timeout (increased from 3s)
-      });
-      
-      // Race the verification against the timeout
-      const { valid, user } = await Promise.race([verifyPromise, timeoutPromise]);
-      backendVerified = true;
-      
-      if (valid && user) {
-        console.log('Token verified successfully, user:', user);
-        updateCurrentUser(user);
-      } else if (fallbackUser) {
-        // If verification failed but we have fallback user data, keep using it
-        console.log('Backend verification returned invalid token but using fallback user data');
-        // Don't clear credentials when we have a fallback
-      } else {
-        console.log('Token is not valid and no fallback user available');
-        tokenService.removeToken();
-        userService.clearUser();
-        updateCurrentUser(null);
+      // If we have a stored user, trust it and avoid backend verification on initial load
+      if (storedUser && !forceCheck) {
+        console.log('User found in storage, using cached data', storedUser);
+        setCurrentUser(storedUser); // Safely set user without causing additional storage operations
+        setInitialCheckDone(true);
+        setLoading(false);
+        verifyingRef.current = false;
+        return;
       }
-    } catch (err) {
-      console.log('Error during backend verification, attempting fallbacks...', err.message);
       
-      // If we already have fallback user data, use it and don't clear credentials
-      if (fallbackUser) {
-        console.log('Using fallback user data due to backend error');
-        // Keep the stored credentials - don't clear anything!
+      // If we have no token at all, clear any stale user data
+      if (!hasToken) {
+        console.log('No valid token found during verification');
+        if (currentUser) { // Only update if needed to avoid re-rendering
+          updateCurrentUser(null);
+        }
+        setInitialCheckDone(true);
+        verifyingRef.current = false;
         setLoading(false);
         return;
       }
       
-      // Only try /me endpoint if we don't have fallback data
-      if (!fallbackUser) {
+      // Only verify with backend if: 
+      // 1. We have a token but no user data, or
+      // 2. This is a forced check, or
+      // 3. Initial check hasn't been done yet
+      if (hasToken && (!storedUser || forceCheck || !initialCheckDone)) {
+        console.log('Verifying token with backend...');
         try {
-          console.log('Trying /me endpoint');
-          const response = await authService.getCurrentUser();
-          console.log('User verification successful via /me:', response.data);
-          updateCurrentUser(response.data);
-        } catch (meErr) {
-          console.error('Error verifying with /me:', meErr);
-          
-          // If we have a token but verification failed, assume network/backend issue
-          // and don't clear credentials, only when truly no auth data is found
-          if (!tokenService.isLoggedIn() && !userService.hasUser()) {
-            console.log('No valid auth data found, clearing credentials');
+          const { valid, user } = await authService.verifyToken();
+          if (valid && user) {
+            console.log('Token verified successfully');
+            updateCurrentUser(user);
+          } else {
+            console.log('Token verification failed');
+            tokenService.removeToken();
+            userService.clearUser();
+            updateCurrentUser(null);
+          }
+        } catch (err) {
+          console.error('Token verification error:', err);
+          // If this is not a forced check, and we have a stored user, keep using it
+          if (!forceCheck && storedUser) {
+            console.log('Using stored user despite verification failure');
+            // Don't clear existing user data when backend is unreachable
+            setCurrentUser(storedUser); // Safely set current user without triggering storage operations
+          } else {
+            // Only clear auth when we don't have a stored user or this is a manual check
             tokenService.removeToken();
             userService.clearUser();
             updateCurrentUser(null);
           }
         }
       }
+    } catch (err) {
+      console.error('Auth verification error:', err);
     } finally {
+      setInitialCheckDone(true);
       setLoading(false);
+      verifyingRef.current = false; // Reset verification flag
     }
   };
   
-  // Background verification that never clears auth data on failure
-  const performBackgroundVerification = async (fallbackUser) => {
-    try {
-      console.log('Performing background verification...');
-      const { valid, user } = await authService.verifyToken();
-      
-      if (valid && user) {
-        // Only update user data if verification succeeds
-        console.log('Background verification successful, updating user data');
-        updateCurrentUser(user);
-      } else {
-        console.log('Background verification failed, keeping existing user data');
-        // Do NOT clear user data or token - assume it's a backend issue, not an auth issue
+  // Handle long backend cold starts by implementing a ping function
+  const pingBackend = async () => {
+    if (!initialCheckDone) {
+      try {
+        // Simple ping to wake up backend - don't wait for response
+        authService.ping().catch(() => {}); // Ignore errors
+      } catch (err) {
+        // Ignore errors
       }
-    } catch (err) {
-      console.log('Background verification error, keeping existing user data', err.message);
-      // Intentionally do nothing on error - keep using existing data
     }
   };
 
-  // Verify on initial load
+  // Verify on initial load - with much simpler approach to avoid flickering
   useEffect(() => {
-    // Immediately set user from stored data to avoid UI flicker
+    console.log('Auth provider mounted');
+    
+    // Early return if we already have user data to avoid unnecessary checks
     const storedUser = userService.getUser();
-    if (storedUser) {
-      console.log('Setting initial user from storage', storedUser);
+    const hasToken = tokenService.isLoggedIn();
+    
+    // Set initial state based on localStorage without backend verification
+    if (storedUser && hasToken) {
       setCurrentUser(storedUser);
-      // Auth verification will happen in the background
+      setInitialCheckDone(true);
+      
+      // Ping backend in the background but don't wait for response
+      pingBackend();
+      
+      // Schedule a delayed verification to validate the token in the background
+      // This will happen after initial render, preventing flickering
+      const delayedVerify = setTimeout(() => {
+        verifyAuth(false);
+      }, 2000); // Longer delay to ensure UI is stabilized first
+      
+      // Set up event listener for auth state changes across tabs
+      const handleStorageChange = (e) => {
+        if (e.key === AUTH_STATE_KEY && e.newValue !== e.oldValue) {
+          console.log('Auth state changed in another tab, reloading...');
+          window.location.reload();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      return () => {
+        clearTimeout(delayedVerify);
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    } else {
+      // If no stored user or token, do immediate verification but without loading state
+      pingBackend();
+      
+      // Slight delay to avoid race conditions with component mounting
+      const timer = setTimeout(() => {
+        verifyAuth(false); // Don't force check on initial load
+      }, 100);
+      
+      // Set up event listener for auth state changes across tabs
+      const handleStorageChange = (e) => {
+        if (e.key === AUTH_STATE_KEY && e.newValue !== e.oldValue) {
+          console.log('Auth state changed in another tab, reloading...');
+          window.location.reload();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('storage', handleStorageChange);
+      };
     }
-    
-    // Start verification process
-    verifyAuth();
-    
-    // Set up event listener for auth state changes across tabs
-    const handleStorageChange = (e) => {
-      if (e.key === AUTH_STATE_KEY && e.newValue !== e.oldValue) {
-        console.log('Auth state changed in another tab, reloading...');
-        window.location.reload();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Login function
@@ -316,7 +294,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     isAuthenticated: !!currentUser,
-    verifyAuth // Expose verify function to force refresh when needed
+    initialCheckDone, // Let components know if initial check is complete
+    verifyAuth // Expose verify function for manual refresh
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

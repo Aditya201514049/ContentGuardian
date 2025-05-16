@@ -6,39 +6,31 @@ import { useEffect, useState } from 'react';
 
 // Protects routes that require authentication
 // Redirects to login if user is not authenticated
-// More resilient to backend availability issues
+// Prevents flickering between authenticated and non-authenticated states
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading, currentUser, verifyAuth } = useAuth();
+  const { isAuthenticated, loading, currentUser, initialCheckDone } = useAuth();
   const hasToken = tokenService.isLoggedIn();
   const hasUserData = userService.hasUser();
   const location = useLocation();
-  const [redirecting, setRedirecting] = useState(false);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Trust either the context auth state or local storage data
+  const userIsAuthenticated = isAuthenticated || hasToken || hasUserData || !!currentUser;
 
-  // Effect to verify auth state only once on initial load
+  // Log the authentication state for debugging
   useEffect(() => {
-    // Only verify on initial load to avoid unnecessary backend calls
-    if (!initialLoadComplete) {
-      const checkAuth = async () => {
-        // If we have a token or user data in storage, trust it first
-        if (hasToken || hasUserData) {
-          console.log('Protected route: Found stored credentials, considering authenticated');
-          setInitialLoadComplete(true);
-        } 
-        // If absolutely no token or user data, redirect to login
-        else if (!hasToken && !hasUserData && !isAuthenticated && !currentUser) {
-          console.log(`Protected route (${location.pathname}) accessed without any auth data, redirecting to login`);
-          setRedirecting(true);
-          setInitialLoadComplete(true);
-        }
-      };
-      
-      checkAuth();
-    }
-  }, [hasToken, hasUserData, isAuthenticated, currentUser, location.pathname, initialLoadComplete]);
+    console.log('ProtectedRoute auth state:', {
+      isAuthenticated,
+      hasToken,
+      hasUserData,
+      currentUser: !!currentUser,
+      initialCheckDone,
+      userIsAuthenticated
+    });
+  }, [isAuthenticated, hasToken, hasUserData, currentUser, initialCheckDone, userIsAuthenticated]);
 
-  // Show loading spinner only during initial authentication check
-  if ((loading && !initialLoadComplete) || redirecting) {
+  // Only show loading spinner during initial load and only if no auth data exists yet
+  // This prevents flickering for authenticated users
+  if (loading && !initialCheckDone && !userIsAuthenticated) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -46,10 +38,9 @@ const ProtectedRoute = () => {
     );
   }
   
-  // More resilient authentication check
-  // Trust stored tokens and user data, especially for remote backends
-  if (!isAuthenticated && !hasToken && !hasUserData && !currentUser) {
-    // Keep track of where the user was trying to go
+  // Only redirect if we've completed the initial check and user is definitely not authenticated
+  if (initialCheckDone && !userIsAuthenticated) {
+    console.log(`Protected route (${location.pathname}): No auth data, redirecting to login`);
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
   

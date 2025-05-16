@@ -239,6 +239,49 @@ const tryAuthEndpoints = async (path, data, method = 'post') => {
 
 // Auth services
 export const authService = {
+  // Simple ping to wake up the backend without authentication
+  ping: async () => {
+    try {
+      // Set a longer timeout for the wake-up call (90 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
+      
+      // Try most likely API endpoint paths that would respond quickly
+      const pingEndpoints = [
+        '/', // Root path
+        '/health', // Common health check endpoint
+        '/ping', // Common ping endpoint
+        '/api', // API root
+      ];
+      
+      // Try each endpoint until one succeeds
+      for (const endpoint of pingEndpoints) {
+        try {
+          const response = await api.get(endpoint, { 
+            signal: controller.signal,
+            timeout: 90000 // 90 second timeout
+          });
+          clearTimeout(timeoutId);
+          console.log('Backend ping successful:', endpoint);
+          return { success: true, endpoint };
+        } catch (err) {
+          // Ignore 404 errors (endpoint doesn't exist) but continue trying others
+          if (err.response && err.response.status !== 404) {
+            // For other errors, we got a response, so backend is awake
+            clearTimeout(timeoutId);
+            console.log('Backend is responding (with error):', endpoint);
+            return { success: true, endpoint, error: err.message };
+          }
+        }
+      }
+      
+      clearTimeout(timeoutId);
+      throw new Error('All ping endpoints failed');
+    } catch (err) {
+      console.log('Backend ping failed:', err.message);
+      return { success: false, error: err.message };
+    }
+  },
   login: async (credentials) => {
     try {
       // Try different possible login endpoints
