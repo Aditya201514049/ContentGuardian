@@ -6,8 +6,51 @@ const api = axios.create({
   baseURL: config.API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 10000, // 10 second timeout
+  withCredentials: true // Important for CORS with credentials
 });
+
+// Create a direct API instance for fallback to direct connection
+const directApi = axios.create({
+  baseURL: config.DIRECT_API_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 10000, // 10 second timeout
+  withCredentials: true // Also add withCredentials here
+});
+
+// Connection test function - can be called to check connectivity
+export const testConnection = async () => {
+  console.log('Testing API connection...');
+  console.log('Current API URL:', config.API_URL);
+  
+  try {
+    // First try the proxied connection
+    console.log('Trying proxied connection...');
+    const proxyResponse = await api.get('/');
+    console.log('Proxy connection successful:', proxyResponse.data);
+    return { success: true, method: 'proxy', data: proxyResponse.data };
+  } catch (proxyError) {
+    console.error('Proxy connection failed:', proxyError.message);
+    
+    // If proxy fails, try direct connection
+    try {
+      console.log('Trying direct connection...');
+      const directResponse = await directApi.get('/');
+      console.log('Direct connection successful:', directResponse.data);
+      return { success: true, method: 'direct', data: directResponse.data };
+    } catch (directError) {
+      console.error('Direct connection failed:', directError.message);
+      return { 
+        success: false, 
+        proxyError: proxyError.message, 
+        directError: directError.message 
+      };
+    }
+  }
+};
 
 // Token handling functions
 const tokenService = {
@@ -90,7 +133,25 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle common response errors
+// Add the same interceptor to directApi
+directApi.interceptors.request.use(
+  (config) => {
+    const token = tokenService.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log(`Direct request to ${config.url} with auth token`);
+    } else {
+      console.log(`Direct request to ${config.url} without auth token`);
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Direct request interceptor error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor with enhanced logging
 api.interceptors.response.use(
   (response) => {
     console.log(`Response from ${response.config.url} successful:`, response.status);
@@ -101,13 +162,39 @@ api.interceptors.response.use(
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
-      data: error.response?.data
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
     });
     
     // Handle 401 Unauthorized errors (typically expired tokens)
     if (error.response && error.response.status === 401) {
       tokenService.removeToken();
       console.error('Authentication error: Token expired or invalid');
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Add same interceptor to directApi
+directApi.interceptors.response.use(
+  (response) => {
+    console.log(`Direct response from ${response.config.url} successful:`, response.status);
+    return response;
+  },
+  (error) => {
+    console.error(`Direct API Error:`, {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    if (error.response && error.response.status === 401) {
+      tokenService.removeToken();
     }
     
     return Promise.reject(error);
