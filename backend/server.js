@@ -16,7 +16,8 @@ const allowedOrigins = [
   'http://localhost:5175',
   'http://localhost:5176',
   'http://localhost:5177',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://your-frontend-render-url.onrender.com' // Add your frontend Render URL here
 ];
 
 app.use(cors({
@@ -37,12 +38,19 @@ app.use(cors({
 
 app.use(express.json());
 
+// Add root route to verify API is running
+app.get('/', (req, res) => {
+  res.json({ message: 'ContentGuardian API is running' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 
+const PORT = process.env.PORT || 5000;
+
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true })
   .then(() => {
-    app.listen(5000, () => console.log('Server running on port 5000'));
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
