@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { tokenService } from '../../services/api';
 import ThemeToggle from '../common/ThemeToggle';
-import ThemeIndicator from '../common/ThemeIndicator';
 
 const Layout = ({ children }) => {
   const { isAuthenticated, currentUser, logout } = useAuth();
@@ -275,7 +274,6 @@ const Layout = ({ children }) => {
           </div>
         </div>
       </footer>
-      <ThemeIndicator />
     </div>
   );
 };
