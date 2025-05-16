@@ -147,7 +147,3 @@ You can use the following credentials to test the different roles:
 - Password hashing using bcrypt
 - Protected routes on both frontend and backend
 - Role verification for all operations
-
-## License
-
-This project is licensed under the ISC License. 
